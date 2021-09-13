@@ -107,7 +107,7 @@ resource "aws_lb_target_group" "example" {
    unhealthy_threshold = 2
    timeout = 5
    interval = 30
-   metcher = 200
+   matcher = 200
    port = "traffic-port"
    protocol = "HTTP"
  }
@@ -125,7 +125,8 @@ resource "aws_lb_listener_rule" "example" {
   }
 
   condition {
-    field = "path-pattern"
-    values = ["/*"]
+    path_pattern {
+      values = ["*"]
+    }
   }
 }
