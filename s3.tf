@@ -64,3 +64,26 @@ resource "aws_s3_bucket" "force_destroy" {
   force_destroy = true
 }
 
+resource "aws_s3_bucket" "artifact" {
+  bucket = "artifact-terraform-ryichk"
+
+  lifecycle_rule {
+    enabled = true
+
+    expiration {
+      days = "180"
+    }
+  }
+}
+
+resource "aws_s3_bucket" "operation" {
+  bucket = "operation-terraform-ryichk"
+
+  lifecycle_rule {
+    enabled = true
+
+    expiration {
+      days = "180"
+    }
+  }
+}
