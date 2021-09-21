@@ -13,3 +13,8 @@ resource "aws_cloudwatch_event_rule" "example_batch" {
   description = "very important batch"
   schedule_expression = "cron(*/2 * * * ? *)"
 }
+
+resource "aws_cloudwatch_log_group" "operation" {
+  name = "/operation"
+  retention_in_days = 180
+}
