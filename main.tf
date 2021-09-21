@@ -92,7 +92,7 @@ data "aws_iam_policy_document" "codebuild" {
       "ecr:BatchCheckLayerAvailability",
       "ecr:GetDownloadUrlForLayer",
       "ecr:GetRepositoryPolicy",
-      "ecr:DescribeRepositoryPolicy",
+      "ecr:DescribeRepositories",
       "ecr:ListImages",
       "ecr:DescribeImages",
       "ecr:BatchGetImage",
