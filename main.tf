@@ -121,7 +121,6 @@ data "aws_iam_policy_document" "codepipline" {
       "s3:GetObject",
       "s3:GetObjectVersion",
       "s3:GetBucketVersioning",
-      "s3:ListBucket",
       "codebuild:BatchGetBuilds",
       "codebuild:StartBuild",
       "ecs:DescribeServices",
