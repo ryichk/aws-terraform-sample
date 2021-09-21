@@ -35,7 +35,7 @@ resource "aws_codepipeline" "example" {
 
       configuration = {
         Owner = "ryichk"
-        Repo = "cafe-shares-web-front"
+        Repo = "aws-terraform-sample"
         Branch = "main"
         OAuthToken = aws_ssm_parameter.github_personal_access_token.value
         PollForSourceChanges = false
@@ -106,7 +106,7 @@ provider "github" {
 }
 
 resource "github_repository_webhook" "example" {
-  repository = "cafe-shares-web-front"
+  repository = "aws-terraform-sample"
 
   configuration {
     url = aws_codepipeline_webhook.example.url
