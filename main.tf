@@ -111,7 +111,7 @@ module "codebuild_role" {
   policy = data.aws_iam_policy_document.codebuild.json
 }
 
-data "aws_iam_policy_document" "codepipline" {
+data "aws_iam_policy_document" "codepipeline" {
   statement {
     effect = "Allow"
     resources = ["*"]
@@ -136,9 +136,9 @@ data "aws_iam_policy_document" "codepipline" {
 
 module "codepipeline_role" {
   source = "./iam_role"
-  name = "codepipline"
+  name = "codepipeline"
   identifier = "codepipeline.amazonaws.com"
-  policy = data.aws_iam_policy_document.codepipline.json
+  policy = data.aws_iam_policy_document.codepipeline.json
 }
 
 data "aws_iam_policy_document" "ec2_for_ssm" {
