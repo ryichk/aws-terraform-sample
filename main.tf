@@ -4,19 +4,19 @@ terraform {
 
 provider "aws" {
   version = "3.37.0"
-  region = "ap-northeast-1"
+  region  = "ap-northeast-1"
 }
 
 data "aws_iam_policy_document" "allow_describe_regions" {
   statement {
-    effect = "Allow"
-    actions = ["ec2:DescribeRegions"]
+    effect    = "Allow"
+    actions   = ["ec2:DescribeRegions"]
     resources = ["*"]
   }
 }
 
 resource "aws_iam_policy" "example" {
-  name = "example"
+  name   = "example"
   policy = data.aws_iam_policy_document.allow_describe_regions.json
 }
 
@@ -25,36 +25,36 @@ data "aws_iam_policy_document" "ec2_assume_role" {
     actions = ["sts:AssumeRole"]
 
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = ["ec2.amazonaws.com"]
     }
   }
 }
 
 resource "aws_iam_role" "example" {
-  name = "example"
+  name               = "example"
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 }
 
 resource "aws_iam_role_policy_attachment" "example" {
-  role = aws_iam_role.example.name
+  role       = aws_iam_role.example.name
   policy_arn = aws_iam_policy.example.arn
 }
 
 module "describe_regions_for_ec2" {
-  source = "./iam_role"
-  name = "describe-regions-for-ec2"
+  source     = "./iam_role"
+  name       = "describe-regions-for-ec2"
   identifier = "ec2.amazonaws.com"
-  policy = data.aws_iam_policy_document.allow_describe_regions.json
+  policy     = data.aws_iam_policy_document.allow_describe_regions.json
 }
 
 data "aws_iam_policy_document" "alb" {
   statement {
-    effect = "Allow"
-    actions = ["s3:PutObject"]
+    effect    = "Allow"
+    actions   = ["s3:PutObject"]
     resources = ["arn:aws:s3:::${aws_s3_bucket.alb_log.id}/*"]
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = ["582318560864"]
     }
   }
@@ -68,22 +68,22 @@ data "aws_iam_policy_document" "ecs_task_execution" {
   source_json = data.aws_iam_policy.ecs_task_execution_role_policy.policy
 
   statement {
-    effect = "Allow"
-    actions = ["ssm:GetParameters", "kms:Decrypt"]
+    effect    = "Allow"
+    actions   = ["ssm:GetParameters", "kms:Decrypt"]
     resources = ["*"]
   }
 }
 
 module "ecs_task_execution_role" {
-  source = "./iam_role"
-  name = "ecs-task-execution"
+  source     = "./iam_role"
+  name       = "ecs-task-execution"
   identifier = "ecs-tasks.amazonaws.com"
-  policy = data.aws_iam_policy_document.ecs_task_execution.json
+  policy     = data.aws_iam_policy_document.ecs_task_execution.json
 }
 
 data "aws_iam_policy_document" "codebuild" {
   statement {
-    effect = "Allow"
+    effect    = "Allow"
     resources = ["*"]
 
     actions = [
@@ -110,15 +110,15 @@ data "aws_iam_policy_document" "codebuild" {
 }
 
 module "codebuild_role" {
-  source = "./iam_role"
-  name = "codebuild"
+  source     = "./iam_role"
+  name       = "codebuild"
   identifier = "codebuild.amazonaws.com"
-  policy = data.aws_iam_policy_document.codebuild.json
+  policy     = data.aws_iam_policy_document.codebuild.json
 }
 
 data "aws_iam_policy_document" "codepipeline" {
   statement {
-    effect = "Allow"
+    effect    = "Allow"
     resources = ["*"]
 
     actions = [
@@ -140,17 +140,17 @@ data "aws_iam_policy_document" "codepipeline" {
 }
 
 module "codepipeline_role" {
-  source = "./iam_role"
-  name = "codepipeline"
+  source     = "./iam_role"
+  name       = "codepipeline"
   identifier = "codepipeline.amazonaws.com"
-  policy = data.aws_iam_policy_document.codepipeline.json
+  policy     = data.aws_iam_policy_document.codepipeline.json
 }
 
 data "aws_iam_policy_document" "ec2_for_ssm" {
   source_json = data.aws_iam_policy.ec2_for_ssm.policy
 
   statement {
-    effect = "Allow"
+    effect    = "Allow"
     resources = ["*"]
 
     actions = [
@@ -174,10 +174,10 @@ data "aws_iam_policy" "ec2_for_ssm" {
 }
 
 module "ec2_for_ssm_role" {
-  source = "./iam_role"
-  name = "ec2-for-ssm"
+  source     = "./iam_role"
+  name       = "ec2-for-ssm"
   identifier = "ec2.amazonaws.com"
-  policy = data.aws_iam_policy_document.ec2_for_ssm.json
+  policy     = data.aws_iam_policy_document.ec2_for_ssm.json
 }
 
 resource "aws_iam_instance_profile" "ec2_for_ssm" {
@@ -206,29 +206,29 @@ data "aws_iam_policy_document" "kinesis_data_firehose" {
 }
 
 module "kinesis_data_firehose_role" {
-  source = "./iam_role"
-  name = "kinesis-data-firehose"
+  source     = "./iam_role"
+  name       = "kinesis-data-firehose"
   identifier = "firehose.amazonaws.com"
-  policy = data.aws_iam_policy_document.kinesis_data_firehose.json
+  policy     = data.aws_iam_policy_document.kinesis_data_firehose.json
 }
 
 data "aws_iam_policy_document" "cloudwatch_logs" {
   statement {
-    effect = "Allow"
-    actions = ["firehose:*"]
+    effect    = "Allow"
+    actions   = ["firehose:*"]
     resources = ["arn:aws:firehose:ap-northeast-1:*:*"]
   }
 
   statement {
-    effect = "Allow"
-    actions = ["iam:PassRole"]
+    effect    = "Allow"
+    actions   = ["iam:PassRole"]
     resources = ["arn:aws:iam::*:role/cloudwatch-logs"]
   }
 }
 
 module "cloudwatch_logs_role" {
-  source = "./iam_role"
-  name = "cloudwatch-logs"
+  source     = "./iam_role"
+  name       = "cloudwatch-logs"
   identifier = "logs.ap-northeast-1.amazonaws.com"
-  policy = data.aws_iam_policy_document.cloudwatch_logs.json
+  policy     = data.aws_iam_policy_document.cloudwatch_logs.json
 }

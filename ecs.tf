@@ -3,27 +3,27 @@ resource "aws_ecs_cluster" "example" {
 }
 
 resource "aws_ecs_task_definition" "example" {
-  family = "example"
-  cpu = "256"
-  memory = "512"
-  network_mode = "awsvpc"
+  family                   = "example"
+  cpu                      = "256"
+  memory                   = "512"
+  network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  container_definitions = file("./container_definitions.json")
-  execution_role_arn = module.ecs_task_execution_role.iam_role_arn
+  container_definitions    = file("./container_definitions.json")
+  execution_role_arn       = module.ecs_task_execution_role.iam_role_arn
 }
 
 resource "aws_ecs_service" "example" {
-  name = "example"
-  cluster = aws_ecs_cluster.example.arn
-  task_definition = aws_ecs_task_definition.example.arn
-  desired_count = 2
-  launch_type = "FARGATE"
-  platform_version = "1.3.0"
+  name                              = "example"
+  cluster                           = aws_ecs_cluster.example.arn
+  task_definition                   = aws_ecs_task_definition.example.arn
+  desired_count                     = 2
+  launch_type                       = "FARGATE"
+  platform_version                  = "1.3.0"
   health_check_grace_period_seconds = 60
 
   network_configuration {
     assign_public_ip = false
-    security_groups = [module.nginx_sg.security_group_id]
+    security_groups  = [module.nginx_sg.security_group_id]
 
     subnets = [
       aws_subnet.private_0.id,
@@ -33,8 +33,8 @@ resource "aws_ecs_service" "example" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.example.arn
-    container_name = "example"
-    container_port = 80
+    container_name   = "example"
+    container_port   = 80
   }
 
   lifecycle {
@@ -43,28 +43,28 @@ resource "aws_ecs_service" "example" {
 }
 
 module "nginx_sg" {
-  source = "./security_group"
-  name = "nginx-sg"
-  vpc_id = aws_vpc.example.id
-  port = 80
+  source      = "./security_group"
+  name        = "nginx-sg"
+  vpc_id      = aws_vpc.example.id
+  port        = 80
   cidr_blocks = [aws_vpc.example.cidr_block]
 }
 
 resource "aws_ecs_task_definition" "example_batch" {
-  family = "example_batch"
-  cpu = "256"
-  memory = "512"
-  network_mode = "awsvpc"
+  family                   = "example_batch"
+  cpu                      = "256"
+  memory                   = "512"
+  network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  container_definitions = file("./batch_container_definitions.json")
-  execution_role_arn = module.ecs_task_execution_role.iam_role_arn
+  container_definitions    = file("./batch_container_definitions.json")
+  execution_role_arn       = module.ecs_task_execution_role.iam_role_arn
 }
 
 module "ecs_events_role" {
-  source = "./iam_role"
-  name = "ecs-events"
+  source     = "./iam_role"
+  name       = "ecs-events"
   identifier = "events.amazonaws.com"
-  policy = data.aws_iam_policy.ecs_events_role_policy.policy
+  policy     = data.aws_iam_policy.ecs_events_role_policy.policy
 }
 
 data "aws_iam_policy" "ecs_events_role_policy" {
@@ -73,19 +73,19 @@ data "aws_iam_policy" "ecs_events_role_policy" {
 
 resource "aws_cloudwatch_event_target" "example_batch" {
   target_id = "example-batch"
-  rule = aws_cloudwatch_event_rule.example_batch.name
-  role_arn = module.ecs_events_role.iam_role_arn
-  arn = aws_ecs_cluster.example.arn
+  rule      = aws_cloudwatch_event_rule.example_batch.name
+  role_arn  = module.ecs_events_role.iam_role_arn
+  arn       = aws_ecs_cluster.example.arn
 
   ecs_target {
-    launch_type = "FARGATE"
-    task_count = 1
-    platform_version = "1.3.0"
+    launch_type         = "FARGATE"
+    task_count          = 1
+    platform_version    = "1.3.0"
     task_definition_arn = aws_ecs_task_definition.example_batch.arn
 
     network_configuration {
       assign_public_ip = "false"
-      subnets = [aws_subnet.private_0.id]
+      subnets          = [aws_subnet.private_0.id]
     }
   }
 }
