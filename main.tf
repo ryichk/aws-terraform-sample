@@ -1,4 +1,9 @@
+terraform {
+  required_version = "0.12.5"
+}
+
 provider "aws" {
+  version = "3.37.0"
   region = "ap-northeast-1"
 }
 
@@ -178,4 +183,52 @@ module "ec2_for_ssm_role" {
 resource "aws_iam_instance_profile" "ec2_for_ssm" {
   name = "ec2-for-ssm"
   role = module.ec2_for_ssm_role.iam_role_name
+}
+
+data "aws_iam_policy_document" "kinesis_data_firehose" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "s3:AbortMultipartUpload",
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+      "s3:PutObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.cloudwatch_logs.id}",
+      "arn:aws:s3:::${aws_s3_bucket.cloudwatch_logs.id}/*",
+    ]
+  }
+}
+
+module "kinesis_data_firehose_role" {
+  source = "./iam_role"
+  name = "kinesis-data-firehose"
+  identifier = "firehose.amazonaws.com"
+  policy = data.aws_iam_policy_document.kinesis_data_firehose.json
+}
+
+data "aws_iam_policy_document" "cloudwatch_logs" {
+  statement {
+    effect = "Allow"
+    actions = ["firehose:*"]
+    resources = ["arn:aws:firehose:ap-northeast-1:*:*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = ["iam:PassRole"]
+    resources = ["arn:aws:iam::*:role/cloudwatch-logs"]
+  }
+}
+
+module "cloudwatch_logs_role" {
+  source = "./iam_role"
+  name = "cloudwatch-logs"
+  identifier = "logs.ap-northeast-1.amazonaws.com"
+  policy = data.aws_iam_policy_document.cloudwatch_logs.json
 }
